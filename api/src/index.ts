@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import bootstrapApp from './app';
 import config from './config';
+import connectToDbClient from './database/db_client';
 import logger from './utilities/logger';
 
 const runApp = async () => {
@@ -11,6 +12,9 @@ const runApp = async () => {
     const PORT = process.env.PORT || config.APP_PORT;
 
     const app = await bootstrapApp();
+
+    // connect to database
+    await connectToDbClient();
 
     app.listen(PORT, () => logger.info(`App running on PORT: ${PORT}`));
 
