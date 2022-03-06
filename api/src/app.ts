@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import logger from './utilities/logger';
+import { RegistrableController } from './api/registrable.controller';
+import container from './inversify.config';
+import TYPES from './types';
 
 export default (): Promise<express.Application> =>
   new Promise<express.Application>((resolve, reject) => {
@@ -11,6 +14,11 @@ export default (): Promise<express.Application> =>
       app.use(cors());
       app.use(express.json());
       app.use(express.urlencoded({ extended: true }));
+
+      // register api routes
+      const controllers: RegistrableController[] =
+        container.getAll<RegistrableController>(TYPES.Controller);
+      controllers.forEach((controller) => controller.registerRoutes(app));
 
       // test api route
       app.get(
