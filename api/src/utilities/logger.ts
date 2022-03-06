@@ -1,8 +1,8 @@
-import winston from "winston";
+import winston from 'winston';
 
 const colorizer = winston.format.colorize();
 const logger = winston.createLogger({
-  level: "debug",
+  level: 'debug',
   format: winston.format.combine(
     winston.format.simple(),
     winston.format.timestamp(),
@@ -10,7 +10,7 @@ const logger = winston.createLogger({
       colorizer.colorize(msg.level, `[app]: ${msg.timestamp} - ${msg.message}`)
     )
   ),
-  transports: [new winston.transports.Console()],
+  transports: [new winston.transports.Console()]
 });
 
 export default logger;

@@ -1,6 +1,6 @@
-import express from "express";
-import cors from "cors";
-import logger from "./utilities/logger";
+import express from 'express';
+import cors from 'cors';
+import logger from './utilities/logger';
 
 export default (): Promise<express.Application> =>
   new Promise<express.Application>((resolve, reject) => {
@@ -14,12 +14,12 @@ export default (): Promise<express.Application> =>
 
       // test api route
       app.get(
-        "/api/v1",
+        '/api/v1',
         async (
           req: express.Request,
           res: express.Response
         ): Promise<express.Response> => {
-          return res.json({ "Moodboard API": "Version 1" });
+          return res.json({ 'Moodboard API': 'Version 1' });
         }
       );
 

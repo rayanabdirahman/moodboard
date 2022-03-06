@@ -1,9 +1,9 @@
 // config environment variables
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
-import bootstrapApp from "./app";
-import config from "./config";
-import logger from "./utilities/logger";
+import bootstrapApp from './app';
+import config from './config';
+import logger from './utilities/logger';
 
 const runApp = async () => {
   try {
