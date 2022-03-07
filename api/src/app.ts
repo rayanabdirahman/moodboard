@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import logger from './utilities/logger';
 import { RegistrableController } from './api/registrable.controller';
 import container from './inversify.config';
@@ -11,6 +12,7 @@ export default (): Promise<express.Application> =>
       const app = express();
 
       // set middleware
+      app.use(helmet());
       app.use(cors());
       app.use(express.json());
       app.use(express.urlencoded({ extended: true }));
