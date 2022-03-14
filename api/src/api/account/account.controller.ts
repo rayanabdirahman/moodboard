@@ -12,6 +12,7 @@ export default class AccountController implements RegistrableController {
   registerRoutes(app: Application): void {
     app.post(`${config.API_URL}/accounts/signup`, this.signUp);
     app.post(`${config.API_URL}/accounts/signin`, this.signIn);
+    app.post(`${config.API_URL}/accounts/signout`, this.signOut);
   }
 
   signUp = async (req: Request, res: Response): Promise<Response> => {
@@ -39,6 +40,17 @@ export default class AccountController implements RegistrableController {
       };
 
       return ApiResponse.success(res, model);
+    } catch (error: any) {
+      logger.error(
+        `[AccountController: signIn] - Unable to sign in user: ${error?.message}`
+      );
+      return ApiResponse.error(res, error?.message);
+    }
+  };
+
+  signOut = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return ApiResponse.success(res, 'Signed out successfully');
     } catch (error: any) {
       logger.error(
         `[AccountController: signIn] - Unable to sign in user: ${error?.message}`
