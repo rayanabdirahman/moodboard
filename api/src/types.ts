@@ -1,5 +1,6 @@
 const TYPES = {
-  Controller: Symbol('Controller')
+  Controller: Symbol('Controller'),
+  AccountService: Symbol('AccountService')
 };
 
 export default TYPES;

@@ -2,6 +2,8 @@ import { Application, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import config from '../../config';
 import { SignInModel, SignUpModel } from '../../domain/interfaces/account';
+import { IAccountService } from '../../services/account.service';
+import TYPES from '../../types';
 import ApiResponse from '../../utilities/api-response';
 import getAvatar from '../../utilities/getAvatar';
 import logger from '../../utilities/logger';
@@ -9,6 +11,12 @@ import { RegistrableController } from '../registrable.controller';
 
 @injectable()
 export default class AccountController implements RegistrableController {
+  private accountService: IAccountService;
+
+  constructor(@inject(TYPES.AccountService) accountService: IAccountService) {
+    this.accountService = accountService;
+  }
+
   registerRoutes(app: Application): void {
     app.post(`${config.API_URL}/accounts/signup`, this.signUp);
     app.post(`${config.API_URL}/accounts/signin`, this.signIn);
