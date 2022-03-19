@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import logger from './utilities/logger';
 import { RegistrableController } from './api/registrable.controller';
 import container from './inversify.config';
@@ -16,6 +17,8 @@ export default (): Promise<express.Application> =>
       app.use(cors());
       app.use(express.json());
       app.use(express.urlencoded({ extended: true }));
+      // use HTTP logger for api requests
+      app.use(morgan('tiny'));
 
       // register api routes
       const controllers: RegistrableController[] =
