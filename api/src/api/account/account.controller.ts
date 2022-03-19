@@ -1,7 +1,11 @@
 import { Application, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import config from '../../config';
-import { SignInModel, SignUpModel } from '../../domain/interfaces/account';
+import {
+  IGoogleSignUpModel,
+  SignInModel,
+  SignUpModel
+} from '../../domain/interfaces/account';
 import { IAccountService } from '../../services/account.service';
 import TYPES from '../../types';
 import ApiResponse from '../../utilities/api-response';
@@ -18,10 +22,29 @@ export default class AccountController implements RegistrableController {
   }
 
   registerRoutes(app: Application): void {
+    app.post(`${config.API_URL}/accounts/auth/google`, this.googleSignUp);
     app.post(`${config.API_URL}/accounts/signup`, this.signUp);
     app.post(`${config.API_URL}/accounts/signin`, this.signIn);
     app.post(`${config.API_URL}/accounts/signout`, this.signOut);
   }
+
+  googleSignUp = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const model: IGoogleSignUpModel = {
+        ...req.body,
+        role: req.body.role && req.body.role
+      };
+
+      const user = await this.accountService.googleSignUp(model);
+
+      return ApiResponse.success(res, user);
+    } catch (error: any) {
+      logger.error(
+        `[AccountController: googleSignUp] - Unable to sign up user with google auth: ${error?.message}`
+      );
+      return ApiResponse.error(res, error?.message);
+    }
+  };
 
   signUp = async (req: Request, res: Response): Promise<Response> => {
     try {

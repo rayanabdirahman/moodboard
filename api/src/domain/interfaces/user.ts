@@ -1,4 +1,4 @@
-import { UserRolesEnum } from '../enums/user';
+import { AccountRolesEnum } from '../enums/account';
 
 export interface IUserModel {
   _id: string;
@@ -6,5 +6,5 @@ export interface IUserModel {
   username: string;
   email: string;
   avatar: string;
-  role: UserRolesEnum[];
+  role: AccountRolesEnum[];
 }
