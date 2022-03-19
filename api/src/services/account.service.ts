@@ -16,13 +16,24 @@ export class AccountServiceImpl implements IAccountService {
     this.userRepository = userRepository;
   }
 
+  private async isUserGoogleIdInDB(id: string): Promise<boolean> {
+    return (await this.userRepository.findOneByGoogleId(id))
+      ? Promise.resolve(true)
+      : Promise.resolve(false);
+  }
+
   async googleSignUp(model: IGoogleSignUpModel): Promise<any> {
     try {
+      // check if user has already signed up
+      // return existing user
+      if (await this.isUserGoogleIdInDB(model.googleId)) {
+        return await this.userRepository.findOneByGoogleId(model.googleId);
+      }
       const user = await this.userRepository.createOne(model);
       return user;
     } catch (error: any) {
       if (error?.code === 11000) {
-        error.message = `A user with the given username or email exists`;
+        error.message = `A user with the given credentials exists`;
       }
       logger.error(
         `[AccountService: googleSignUp]: Unabled to create a new user: ${error}`

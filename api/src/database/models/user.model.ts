@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { AccountRolesEnum } from '../../domain/enums/account';
 
-export interface UserDocument extends mongoose.Document {
+export interface IUserDocument extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   googleId: string | undefined;
   name: string;
@@ -29,4 +29,4 @@ const UserSchema: mongoose.Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model<UserDocument>('User', UserSchema);
+export default mongoose.model<IUserDocument>('User', UserSchema);

@@ -3,18 +3,32 @@ import {
   IGoogleSignUpModel,
   SignUpModel
 } from '../../domain/interfaces/account';
-import User, { UserDocument } from '../models/user.model';
+import User, { IUserDocument } from '../models/user.model';
 
 export interface IUserRepository {
-  createOne(model: SignUpModel | IGoogleSignUpModel): Promise<UserDocument>;
+  createOne(model: SignUpModel | IGoogleSignUpModel): Promise<IUserDocument>;
+  findOneByGoogleId(
+    googleId: string,
+    safeguard?: boolean
+  ): Promise<IUserDocument | null>;
 }
 
 @injectable()
 export class UserRepositoryImpl implements IUserRepository {
   async createOne(
     model: SignUpModel | IGoogleSignUpModel
-  ): Promise<UserDocument> {
+  ): Promise<IUserDocument> {
     const user = new User(model);
     return await user.save();
+  }
+
+  async findOneByGoogleId(
+    googleId: string,
+    safeguard = true
+  ): Promise<IUserDocument | null> {
+    // check if password should be returned with user document
+    return safeguard
+      ? await User.findOne({ googleId }).select('-password -__v')
+      : await User.findOne({ googleId });
   }
 }
