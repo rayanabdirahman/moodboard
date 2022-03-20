@@ -9,6 +9,7 @@ export interface IUserDocument extends mongoose.Document {
   email: string;
   avatar: string;
   password: string;
+  refreshToken: string;
   role: AccountRolesEnum[];
 }
 
@@ -20,6 +21,7 @@ const UserSchema: mongoose.Schema = new mongoose.Schema(
     email: { type: String, required: true, trim: true, unique: true },
     avatar: { type: String },
     password: { type: String },
+    refreshToken: { type: String },
     role: {
       type: [String],
       enum: [AccountRolesEnum],

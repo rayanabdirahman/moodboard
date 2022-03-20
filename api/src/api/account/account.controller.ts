@@ -8,7 +8,9 @@ import {
 } from '../../domain/interfaces/account';
 import { IAccountService } from '../../services/account.service';
 import TYPES from '../../types';
-import ApiResponse from '../../utilities/api-response';
+import ApiResponse, {
+  ApiErrorStatusCodeEnum
+} from '../../utilities/apiResponse';
 import getAvatar from '../../utilities/getAvatar';
 import logger from '../../utilities/logger';
 import { RegistrableController } from '../registrable.controller';
@@ -26,6 +28,10 @@ export default class AccountController implements RegistrableController {
     app.post(`${config.API_URL}/accounts/signup`, this.signUp);
     app.post(`${config.API_URL}/accounts/signin`, this.signIn);
     app.post(`${config.API_URL}/accounts/signout`, this.signOut);
+    app.get(
+      `${config.API_URL}/accounts/auth/accessToken/refresh`,
+      this.refreshAccessToken
+    );
   }
 
   googleSignUp = async (req: Request, res: Response): Promise<Response> => {
@@ -35,9 +41,16 @@ export default class AccountController implements RegistrableController {
         role: req.body.role && req.body.role
       };
 
-      const user = await this.accountService.googleSignUp(model);
+      const { user, accessToken, refreshToken } =
+        await this.accountService.googleSignUp(model);
 
-      return ApiResponse.success(res, user);
+      res.cookie('jwt', refreshToken, {
+        httpOnly: true,
+        // option to set cookies longer
+        maxAge: 24 * 60 * 60 * 1000
+      });
+
+      return ApiResponse.success(res, { user, accessToken });
     } catch (error: any) {
       logger.error(
         `[AccountController: googleSignUp] - Unable to sign up user with google auth: ${error?.message}`
@@ -87,6 +100,39 @@ export default class AccountController implements RegistrableController {
         `[AccountController: signIn] - Unable to sign in user: ${error?.message}`
       );
       return ApiResponse.error(res, error?.message);
+    }
+  };
+
+  refreshAccessToken = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    try {
+      const { jwt: refreshToken } = req.cookies;
+      if (!refreshToken) {
+        const message = 'Authentication denied. Please sign in';
+        return ApiResponse.error(
+          res,
+          message,
+          ApiErrorStatusCodeEnum.UNAUTHORIZED
+        );
+      }
+
+      console.log('COOKIES JWT: ', refreshToken);
+
+      const { user, accessToken } =
+        await this.accountService.refreshAccessToken(refreshToken);
+
+      return ApiResponse.success(res, { user, accessToken });
+    } catch (error: any) {
+      logger.error(
+        `[AccountController: refreshAccessToken] - Unable to create new user access token: ${error?.message}`
+      );
+      return ApiResponse.error(
+        res,
+        error?.message,
+        ApiErrorStatusCodeEnum.FORBIDDEN
+      );
     }
   };
 }

@@ -1,5 +1,10 @@
 import { Response } from 'express';
 
+export enum ApiErrorStatusCodeEnum {
+  UNAUTHORIZED = 401,
+  FORBIDDEN = 403
+}
+
 interface IApiResponse {
   success(
     res: Response,

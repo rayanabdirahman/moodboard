@@ -3,7 +3,9 @@ const config = {
   APP_DB_NAME: process.env.APP_DB_NAME,
   APP_DB_USERNAME: process.env.APP_DB_USERNAME,
   APP_DB_PASSWORD: process.env.APP_DB_PASSWORD,
-  API_URL: process.env.API_URL
+  API_URL: process.env.API_URL,
+  APP_JWT_ACCESS_TOKEN_SECRET: process.env.APP_JWT_ACCESS_TOKEN_SECRET,
+  APP_JWT_REFRESH_TOKEN_SECRET: process.env.APP_JWT_REFRESH_TOKEN_SECRET
 };
 
 export default config;

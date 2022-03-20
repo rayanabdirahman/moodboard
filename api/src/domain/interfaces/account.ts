@@ -1,4 +1,5 @@
 import { AccountRolesEnum } from '../enums/account';
+import { IUserModel } from './user';
 
 export interface IGoogleSignUpModel {
   googleId: string;
@@ -21,4 +22,8 @@ export interface SignUpModel {
 export interface SignInModel {
   email: string;
   password: string;
+}
+
+export interface IJWTPayload {
+  user: IUserModel;
 }

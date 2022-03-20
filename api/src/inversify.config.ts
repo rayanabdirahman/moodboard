@@ -11,11 +11,13 @@ import {
   IUserRepository,
   UserRepositoryImpl
 } from './database/repositories/user.repository';
+import UserController from './api/user/user.controller';
 
 const container = new Container();
 
 // controllers
 container.bind<RegistrableController>(TYPES.Controller).to(AccountController);
+container.bind<RegistrableController>(TYPES.Controller).to(UserController);
 
 // services
 container.bind<IAccountService>(TYPES.AccountService).to(AccountServiceImpl);
