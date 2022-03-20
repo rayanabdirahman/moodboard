@@ -5,6 +5,10 @@ export enum ApiErrorStatusCodeEnum {
   FORBIDDEN = 403
 }
 
+export enum ApiSuccessStatusCodeEnum {
+  NO_CONTENT = 204
+}
+
 interface IApiResponse {
   success(
     res: Response,

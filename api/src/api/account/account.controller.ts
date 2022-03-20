@@ -9,7 +9,8 @@ import {
 import { IAccountService } from '../../services/account.service';
 import TYPES from '../../types';
 import ApiResponse, {
-  ApiErrorStatusCodeEnum
+  ApiErrorStatusCodeEnum,
+  ApiSuccessStatusCodeEnum
 } from '../../utilities/apiResponse';
 import getAvatar from '../../utilities/getAvatar';
 import logger from '../../utilities/logger';
@@ -46,6 +47,8 @@ export default class AccountController implements RegistrableController {
 
       res.cookie('jwt', refreshToken, {
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
         // option to set cookies longer
         maxAge: 24 * 60 * 60 * 1000
       });
@@ -94,7 +97,39 @@ export default class AccountController implements RegistrableController {
 
   signOut = async (req: Request, res: Response): Promise<Response> => {
     try {
-      return ApiResponse.success(res, 'Signed out successfully');
+      const { jwt: refreshToken } = req.cookies;
+      if (!refreshToken) {
+        const message = 'No user to sign out';
+        return ApiResponse.success(
+          res,
+          message,
+          ApiSuccessStatusCodeEnum.NO_CONTENT
+        );
+      }
+
+      const dbRefreshToken = await this.accountService.isRefreshTokenInDB(
+        refreshToken
+      );
+      if (!dbRefreshToken) {
+        res.clearCookie('jwt', {
+          httpOnly: true,
+          sameSite: 'none',
+          secure: true
+        });
+      }
+
+      await this.accountService.signOut(refreshToken);
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true
+      });
+
+      return ApiResponse.success(
+        res,
+        'Signed out successfully',
+        ApiSuccessStatusCodeEnum.NO_CONTENT
+      );
     } catch (error: any) {
       logger.error(
         `[AccountController: signIn] - Unable to sign in user: ${error?.message}`
@@ -117,8 +152,6 @@ export default class AccountController implements RegistrableController {
           ApiErrorStatusCodeEnum.UNAUTHORIZED
         );
       }
-
-      console.log('COOKIES JWT: ', refreshToken);
 
       const { user, accessToken } =
         await this.accountService.refreshAccessToken(refreshToken);

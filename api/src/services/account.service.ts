@@ -12,6 +12,8 @@ import logger from '../utilities/logger';
 
 export interface IAccountService {
   googleSignUp(model: IGoogleSignUpModel): Promise<any>;
+  signOut(refreshToken: string): Promise<any>;
+  isRefreshTokenInDB(refreshToken: string): Promise<any>;
   refreshAccessToken(refreshToken: string): Promise<any>;
 }
 
@@ -25,6 +27,13 @@ export class AccountServiceImpl implements IAccountService {
 
   private async isUserGoogleIdInDB(id: string): Promise<IUserDocument | null> {
     const user = await this.userRepository.findOneByGoogleId(id);
+    return user ? user : null;
+  }
+
+  async isRefreshTokenInDB(
+    refreshToken: string
+  ): Promise<IUserDocument | null> {
+    const user = await this.userRepository.findOneByRefreshToken(refreshToken);
     return user ? user : null;
   }
 
@@ -69,6 +78,27 @@ export class AccountServiceImpl implements IAccountService {
     }
   }
 
+  async signOut(refreshToken: string): Promise<any> {
+    try {
+      const user = await this.userRepository.findOneByRefreshToken(
+        refreshToken
+      );
+      if (!user) {
+        throw new Error('User with given refresh token does not exist');
+      }
+
+      // remove user refresh token
+      await this.userRepository.findOneByIdAndUpdate(user._id, {
+        refreshToken: ''
+      });
+    } catch (error: any) {
+      logger.error(
+        `[AccountService: signOut]: Unable to sign user out: ${error}`
+      );
+      throw error;
+    }
+  }
+
   async refreshAccessToken(refreshToken: string): Promise<any> {
     try {
       const user = await this.userRepository.findOneByRefreshToken(
@@ -91,9 +121,6 @@ export class AccountServiceImpl implements IAccountService {
 
       return { user, accessToken, refreshToken };
     } catch (error: any) {
-      if (error?.code === 11000) {
-        error.message = `A user with the given credentials exists`;
-      }
       logger.error(
         `[AccountService: refreshAccessToken]: Unable to create new user access token: ${error}`
       );
