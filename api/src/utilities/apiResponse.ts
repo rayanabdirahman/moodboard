@@ -2,7 +2,8 @@ import { Response } from 'express';
 
 export enum ApiErrorStatusCodeEnum {
   UNAUTHORIZED = 401,
-  FORBIDDEN = 403
+  FORBIDDEN = 403,
+  NOT_FOUND = 404
 }
 
 export enum ApiSuccessStatusCodeEnum {

@@ -2,6 +2,7 @@ import { injectable, inject } from 'inversify';
 import { IUserDocument } from '../database/models/user.model';
 import { IUserRepository } from '../database/repositories/user.repository';
 import {
+  IGoogleSignInModel,
   IGoogleSignUpModel,
   IJWTPayload,
   SignUpModel
@@ -12,6 +13,7 @@ import logger from '../utilities/logger';
 
 export interface IAccountService {
   googleSignUp(model: IGoogleSignUpModel): Promise<any>;
+  googleSignIn(model: IGoogleSignInModel): Promise<any>;
   signOut(refreshToken: string): Promise<any>;
   isRefreshTokenInDB(refreshToken: string): Promise<any>;
   refreshAccessToken(refreshToken: string): Promise<any>;
@@ -73,6 +75,36 @@ export class AccountServiceImpl implements IAccountService {
       }
       logger.error(
         `[AccountService: googleSignUp]: Unabled to create a new user: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  async googleSignIn(model: IGoogleSignInModel): Promise<any> {
+    try {
+      // check if user exists
+      const user = await this.isUserGoogleIdInDB(model.googleId);
+      if (!user) {
+        throw new Error(
+          'User with given credentials does not exist. Please sign up'
+        );
+      }
+
+      // create JWT refresh token for user
+      const refreshToken = await JWTHelper.signRefreshToken(user);
+
+      // save refresh token to DB for user
+      await this.userRepository.findOneByIdAndUpdate(user._id, {
+        refreshToken
+      });
+
+      // sign JWT access token
+      const accessToken = await JWTHelper.signAccessToken(user);
+
+      return { user, accessToken, refreshToken };
+    } catch (error: any) {
+      logger.error(
+        `[AccountService: googleSignIn]: Unabled to sign in user: ${error}`
       );
       throw error;
     }

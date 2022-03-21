@@ -2,6 +2,7 @@ import { Application, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import config from '../../config';
 import {
+  IGoogleSignInModel,
   IGoogleSignUpModel,
   SignInModel,
   SignUpModel
@@ -25,7 +26,14 @@ export default class AccountController implements RegistrableController {
   }
 
   registerRoutes(app: Application): void {
-    app.post(`${config.API_URL}/accounts/auth/google`, this.googleSignUp);
+    app.post(
+      `${config.API_URL}/accounts/auth/google/signup`,
+      this.googleSignUp
+    );
+    app.post(
+      `${config.API_URL}/accounts/auth/google/signin`,
+      this.googleSignIn
+    );
     app.post(`${config.API_URL}/accounts/signup`, this.signUp);
     app.post(`${config.API_URL}/accounts/signin`, this.signIn);
     app.post(`${config.API_URL}/accounts/signout`, this.signOut);
@@ -59,6 +67,36 @@ export default class AccountController implements RegistrableController {
         `[AccountController: googleSignUp] - Unable to sign up user with google auth: ${error?.message}`
       );
       return ApiResponse.error(res, error?.message);
+    }
+  };
+
+  googleSignIn = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const model: IGoogleSignInModel = {
+        ...req.body
+      };
+
+      const { user, accessToken, refreshToken } =
+        await this.accountService.googleSignIn(model);
+
+      res.cookie('jwt', refreshToken, {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        // option to set cookies longer
+        maxAge: 24 * 60 * 60 * 1000
+      });
+
+      return ApiResponse.success(res, { user, accessToken });
+    } catch (error: any) {
+      logger.error(
+        `[AccountController: googleSignIn] - Unable to sign in user with google auth: ${error?.message}`
+      );
+      return ApiResponse.error(
+        res,
+        error?.message,
+        ApiErrorStatusCodeEnum.NOT_FOUND
+      );
     }
   };
 
