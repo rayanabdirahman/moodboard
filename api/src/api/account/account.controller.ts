@@ -56,7 +56,7 @@ export default class AccountController implements RegistrableController {
       res.cookie('jwt', refreshToken, {
         httpOnly: true,
         sameSite: 'none',
-        secure: true,
+        // secure: true, uncomment when https is implemented
         // option to set cookies longer
         maxAge: 24 * 60 * 60 * 1000
       });
@@ -82,7 +82,7 @@ export default class AccountController implements RegistrableController {
       res.cookie('jwt', refreshToken, {
         httpOnly: true,
         sameSite: 'none',
-        secure: true,
+        // secure: true, uncomment when https is implemented
         // option to set cookies longer
         maxAge: 24 * 60 * 60 * 1000
       });
@@ -151,16 +151,16 @@ export default class AccountController implements RegistrableController {
       if (!dbRefreshToken) {
         res.clearCookie('jwt', {
           httpOnly: true,
-          sameSite: 'none',
-          secure: true
+          sameSite: 'none'
+          // secure: true uncomment when https is implemented
         });
       }
 
       await this.accountService.signOut(refreshToken);
       res.clearCookie('jwt', {
         httpOnly: true,
-        sameSite: 'none',
-        secure: true
+        sameSite: 'none'
+        // secure: true uncomment when https is implemented
       });
 
       return ApiResponse.success(
@@ -183,7 +183,7 @@ export default class AccountController implements RegistrableController {
     try {
       const { jwt: refreshToken } = req.cookies;
       if (!refreshToken) {
-        const message = 'Authentication denied. Please sign in';
+        const message = 'Authentication denied. Refresh token invalid';
         return ApiResponse.error(
           res,
           message,

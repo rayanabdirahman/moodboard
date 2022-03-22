@@ -83,25 +83,30 @@ export class AccountServiceImpl implements IAccountService {
   async googleSignIn(model: IGoogleSignInModel): Promise<any> {
     try {
       // check if user exists
-      const user = await this.isUserGoogleIdInDB(model.googleId);
-      if (!user) {
+      const userInDB = await this.isUserGoogleIdInDB(model.googleId);
+      if (!userInDB) {
         throw new Error(
           'User with given credentials does not exist. Please sign up'
         );
       }
 
       // create JWT refresh token for user
-      const refreshToken = await JWTHelper.signRefreshToken(user);
+      const refreshToken = await JWTHelper.signRefreshToken(userInDB);
 
       // save refresh token to DB for user
-      await this.userRepository.findOneByIdAndUpdate(user._id, {
-        refreshToken
-      });
+      const updatedUser = await this.userRepository.findOneByIdAndUpdate(
+        userInDB._id,
+        {
+          refreshToken
+        }
+      );
 
       // sign JWT access token
-      const accessToken = await JWTHelper.signAccessToken(user);
+      const accessToken = await JWTHelper.signAccessToken(
+        updatedUser as IUserDocument
+      );
 
-      return { user, accessToken, refreshToken };
+      return { user: updatedUser, accessToken, refreshToken };
     } catch (error: any) {
       logger.error(
         `[AccountService: googleSignIn]: Unabled to sign in user: ${error}`

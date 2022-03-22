@@ -55,6 +55,6 @@ export class UserRepositoryImpl implements IUserRepository {
     _id: Types.ObjectId,
     update: any
   ): Promise<IUserDocument | null> {
-    return await User.findByIdAndUpdate(_id, update);
+    return await User.findByIdAndUpdate(_id, update, { new: true });
   }
 }
