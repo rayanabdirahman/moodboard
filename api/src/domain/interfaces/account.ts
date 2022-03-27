@@ -14,7 +14,7 @@ export interface IGoogleSignInModel {
   googleId: string;
 }
 
-export interface SignUpModel {
+export interface ISignUpModel {
   name: string;
   username: string;
   email: string;

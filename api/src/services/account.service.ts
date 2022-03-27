@@ -5,7 +5,7 @@ import {
   IGoogleSignInModel,
   IGoogleSignUpModel,
   IJWTPayload,
-  SignUpModel
+  ISignUpModel
 } from '../domain/interfaces/account';
 import TYPES from '../types';
 import JWTHelper from '../utilities/jwtHelper';
@@ -14,6 +14,7 @@ import logger from '../utilities/logger';
 export interface IAccountService {
   googleSignUp(model: IGoogleSignUpModel): Promise<any>;
   googleSignIn(model: IGoogleSignInModel): Promise<any>;
+  signUp(model: ISignUpModel): Promise<any>;
   signOut(refreshToken: string): Promise<any>;
   isRefreshTokenInDB(refreshToken: string): Promise<any>;
   refreshAccessToken(refreshToken: string): Promise<any>;
@@ -43,32 +44,32 @@ export class AccountServiceImpl implements IAccountService {
     try {
       // check if user has already signed up
       const existingUser = await this.isUserGoogleIdInDB(model.googleId);
-      if (existingUser) {
-        const { refreshToken, ...user } = existingUser.toJSON();
+      // if (existingUser) {
+      //   const { refreshToken, ...user } = existingUser.toJSON();
 
-        // sign JWT access token
-        const accessToken = await JWTHelper.signAccessToken(
-          user as IUserDocument
-        );
+      //   // sign JWT access token
+      //   const accessToken = await JWTHelper.signAccessToken(
+      //     user as IUserDocument
+      //   );
 
-        return { user, accessToken, refreshToken };
-      }
+      //   return { user, accessToken, refreshToken };
+      // }
 
       // create new user
       const user = await this.userRepository.createOne(model);
 
-      // create JWT refresh token for user
-      const refreshToken = await JWTHelper.signRefreshToken(user);
+      // build access and refresh tokens
+      const { accessToken, refreshToken } = await JWTHelper.buildTokens(user);
 
       // save refresh token to DB for user
-      await this.userRepository.findOneByIdAndUpdate(user._id, {
-        refreshToken
-      });
+      const updatedUser = await this.userRepository.findOneByIdAndUpdate(
+        user._id,
+        {
+          refreshToken
+        }
+      );
 
-      // sign JWT access token
-      const accessToken = await JWTHelper.signAccessToken(user);
-
-      return { user, accessToken, refreshToken };
+      return { user: updatedUser, accessToken, refreshToken };
     } catch (error: any) {
       if (error?.code === 11000) {
         error.message = `A user with the given credentials exists`;
@@ -90,8 +91,13 @@ export class AccountServiceImpl implements IAccountService {
         );
       }
 
-      // create JWT refresh token for user
-      const refreshToken = await JWTHelper.signRefreshToken(userInDB);
+      // // create JWT refresh token for user
+      // const refreshToken = await JWTHelper.signRefreshToken(userInDB);
+
+      // build access and refresh tokens
+      const { accessToken, refreshToken } = await JWTHelper.buildTokens(
+        userInDB
+      );
 
       // save refresh token to DB for user
       const updatedUser = await this.userRepository.findOneByIdAndUpdate(
@@ -102,14 +108,42 @@ export class AccountServiceImpl implements IAccountService {
       );
 
       // sign JWT access token
-      const accessToken = await JWTHelper.signAccessToken(
-        updatedUser as IUserDocument
-      );
+      // const accessToken = await JWTHelper.signAccessToken(
+      //   updatedUser as IUserDocument
+      // );
 
       return { user: updatedUser, accessToken, refreshToken };
     } catch (error: any) {
       logger.error(
         `[AccountService: googleSignIn]: Unabled to sign in user: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  async signUp(model: ISignUpModel): Promise<any> {
+    try {
+      // create new user
+      const user = await this.userRepository.createOne(model);
+
+      // build access and refresh tokens
+      const { accessToken, refreshToken } = await JWTHelper.buildTokens(user);
+
+      // save refresh token to DB for user
+      const updatedUser = await this.userRepository.findOneByIdAndUpdate(
+        user._id,
+        {
+          refreshToken
+        }
+      );
+
+      return { user: updatedUser, accessToken, refreshToken };
+    } catch (error: any) {
+      if (error?.code === 11000) {
+        error.message = `A user with the given credentials exists`;
+      }
+      logger.error(
+        `[AccountService: signUp]: Unabled to create a new user: ${error}`
       );
       throw error;
     }
@@ -156,7 +190,8 @@ export class AccountServiceImpl implements IAccountService {
       // sign JWT access token
       const accessToken = await JWTHelper.signAccessToken(user);
 
-      return { user, accessToken, refreshToken };
+      // return { user, accessToken, refreshToken };
+      return { accessToken, refreshToken };
     } catch (error: any) {
       logger.error(
         `[AccountService: refreshAccessToken]: Unable to create new user access token: ${error}`

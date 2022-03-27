@@ -15,6 +15,7 @@ export default (): Promise<express.Application> =>
 
       // set middleware
       app.use(helmet());
+      // app.use(cors({ credentials: true }));
       app.use(cors());
       app.use(express.urlencoded({ extended: true }));
       app.use(express.json());

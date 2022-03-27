@@ -2,12 +2,12 @@ import { injectable } from 'inversify';
 import { Types } from 'mongoose';
 import {
   IGoogleSignUpModel,
-  SignUpModel
+  ISignUpModel
 } from '../../domain/interfaces/account';
 import User, { IUserDocument } from '../models/user.model';
 
 export interface IUserRepository {
-  createOne(model: SignUpModel | IGoogleSignUpModel): Promise<IUserDocument>;
+  createOne(model: ISignUpModel | IGoogleSignUpModel): Promise<IUserDocument>;
   findOneByGoogleId(
     googleId: string,
     safeguard?: boolean
@@ -25,7 +25,7 @@ export interface IUserRepository {
 @injectable()
 export class UserRepositoryImpl implements IUserRepository {
   async createOne(
-    model: SignUpModel | IGoogleSignUpModel
+    model: ISignUpModel | IGoogleSignUpModel
   ): Promise<IUserDocument> {
     const user = new User(model);
     return await user.save();
