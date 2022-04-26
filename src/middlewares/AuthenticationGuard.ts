@@ -48,6 +48,7 @@ const AuthenticationGuard = async (
   next: NextFunction
 ) => {
   try {
+    console.log('req.cookies: ', req.cookies);
     // check if Access token is in cookies
     const accessToken = req.cookies[Cookies.ACCESS_TOKEN];
     // console.log('[AuthenticationGuard]: ACCESS TOKEN: ', accessToken);
