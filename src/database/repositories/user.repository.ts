@@ -16,6 +16,10 @@ export interface IUserRepository {
     refreshToken: string,
     safeguard?: boolean
   ): Promise<IUserDocument | null>;
+  findOneByEmail(
+    email: string,
+    safeguard?: boolean
+  ): Promise<IUserDocument | null>;
   findOneByIdAndUpdate(
     _id: Types.ObjectId,
     update: any
@@ -49,6 +53,16 @@ export class UserRepositoryImpl implements IUserRepository {
     return safeguard
       ? await User.findOne({ refreshToken }).select('-password -__v')
       : await User.findOne({ refreshToken });
+  }
+
+  async findOneByEmail(
+    email: string,
+    safeguard = true
+  ): Promise<IUserDocument | null> {
+    // check if password should be returned with user document
+    return safeguard
+      ? await User.findOne({ email }).select('-password -__v')
+      : await User.findOne({ email });
   }
 
   async findOneByIdAndUpdate(

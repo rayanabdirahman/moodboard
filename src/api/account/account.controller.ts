@@ -143,7 +143,12 @@ export default class AccountController implements RegistrableController {
         return ApiResponse.error(res, message);
       }
 
-      return ApiResponse.success(res, model);
+      const { user, accessToken, refreshToken } =
+        await this.accountService.signIn(model);
+
+      CookiesUtil.setTokens(res, accessToken, refreshToken);
+
+      return ApiResponse.success(res, { user, accessToken });
     } catch (error: any) {
       logger.error(
         `[AccountController: signIn] - Unable to sign in user: ${error?.message}`

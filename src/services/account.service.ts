@@ -5,9 +5,11 @@ import {
   IGoogleSignInModel,
   IGoogleSignUpModel,
   IJWTPayload,
+  ISignInModel,
   ISignUpModel
 } from '../domain/interfaces/account';
 import TYPES from '../types';
+import BycryptHelper from '../utilities/bcryptHelper';
 import JWTHelper from '../utilities/jwtHelper';
 import logger from '../utilities/logger';
 
@@ -15,6 +17,7 @@ export interface IAccountService {
   googleSignUp(model: IGoogleSignUpModel): Promise<any>;
   googleSignIn(model: IGoogleSignInModel): Promise<any>;
   signUp(model: ISignUpModel): Promise<any>;
+  signIn(model: ISignInModel): Promise<any>;
   signOut(refreshToken: string): Promise<any>;
   isRefreshTokenInDB(refreshToken: string): Promise<any>;
   refreshAccessToken(refreshToken: string): Promise<any>;
@@ -144,6 +147,37 @@ export class AccountServiceImpl implements IAccountService {
       }
       logger.error(
         `[AccountService: signUp]: Unabled to create a new user: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  async signIn(model: ISignInModel): Promise<any> {
+    try {
+      // find user by email address
+      const user = await this.userRepository.findOneByEmail(model.email, false);
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+
+      const { password: hashedPassword, ...rest } = user.toObject();
+
+      // check if passwords match
+      const doPasswordsMatch = await BycryptHelper.comparePassword(
+        model.password,
+        user.password
+      );
+      if (!doPasswordsMatch) {
+        throw new Error('Invalid credentials');
+      }
+
+      // build access and refresh tokens
+      const { accessToken, refreshToken } = await JWTHelper.buildTokens(user);
+
+      return { user, accessToken, refreshToken };
+    } catch (error) {
+      logger.error(
+        `[AccountService: signIn]: Unabled to sign in user: ${error}`
       );
       throw error;
     }
