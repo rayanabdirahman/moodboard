@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { AccountRolesEnum } from '../../domain/enums/account';
+import BycryptHelper from '../../utilities/bcryptHelper';
 
 export interface IUserDocument extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
@@ -50,5 +51,14 @@ const UserSchema: mongoose.Schema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Encrypt user password before saving
+UserSchema.pre('save', async function () {
+  if (this.isModified('password')) {
+    // hash user password
+    const password = await BycryptHelper.encryptPassword(this.get('password'));
+    this.set({ password });
+  }
+});
 
 export default mongoose.model<IUserDocument>('User', UserSchema);
