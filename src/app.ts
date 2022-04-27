@@ -7,6 +7,7 @@ import logger from './utilities/logger';
 import { RegistrableController } from './api/registrable.controller';
 import container from './inversify.config';
 import TYPES from './types';
+import corsOptions from './utilities/corsOptions';
 
 export default (): Promise<express.Application> =>
   new Promise<express.Application>((resolve, reject) => {
@@ -15,13 +16,12 @@ export default (): Promise<express.Application> =>
 
       // set middleware
       app.use(helmet());
-      // app.use(cors({ credentials: true }));
-      app.use(cors());
+      app.use(cors(corsOptions));
       app.use(express.urlencoded({ extended: true }));
       app.use(express.json());
       app.use(cookieParser());
       // use HTTP logger for api requests
-      app.use(morgan('tiny'));
+      app.use(morgan('dev'));
 
       // register api routes
       const controllers: RegistrableController[] =
