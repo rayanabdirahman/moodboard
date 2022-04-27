@@ -23,7 +23,7 @@ export interface ISignUpModel {
   role: AccountRolesEnum;
 }
 
-export interface SignInModel {
+export interface ISignInModel {
   email: string;
   password: string;
 }

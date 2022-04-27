@@ -5,7 +5,7 @@ import {
   IGoogleSignInModel,
   IGoogleSignUpModel,
   ISignUpModel,
-  SignInModel
+  ISignInModel
 } from '../../domain/interfaces/account';
 import AuthenticationGuard from '../../middlewares/AuthenticationGuard';
 import { IAccountService } from '../../services/account.service';
@@ -19,6 +19,7 @@ import CookiesUtil from '../../utilities/cookiesUtil';
 import getAvatar from '../../utilities/getAvatar';
 import logger from '../../utilities/logger';
 import { RegistrableController } from '../registrable.controller';
+import AccountValidator from './account.validator';
 
 @injectable()
 export default class AccountController implements RegistrableController {
@@ -108,6 +109,13 @@ export default class AccountController implements RegistrableController {
         role: req.body.role && req.body.role
       };
 
+      // validate request body
+      const validity = AccountValidator.signUp(model);
+      if (validity.error) {
+        const { message } = validity.error;
+        return ApiResponse.error(res, message);
+      }
+
       const { user, accessToken, refreshToken } =
         await this.accountService.signUp(model);
 
@@ -124,9 +132,16 @@ export default class AccountController implements RegistrableController {
 
   signIn = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const model: SignInModel = {
+      const model: ISignInModel = {
         ...req.body
       };
+
+      // validate request body
+      const validity = AccountValidator.signIn(model);
+      if (validity.error) {
+        const { message } = validity.error;
+        return ApiResponse.error(res, message);
+      }
 
       return ApiResponse.success(res, model);
     } catch (error: any) {
