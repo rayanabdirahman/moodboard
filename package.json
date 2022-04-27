@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "rimraf ./build && tsc -p ./",
+    "start": "npm run build && node build/index.js",
     "start:dev": "nodemon --exec ts-node --files src/index.ts",
     "lint": "eslint . --ext .ts",
     "prettier:format": "prettier --config .prettierrc 'src/**/*.ts' --write",
@@ -43,6 +45,7 @@
     "eslint": "^8.10.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
+    "rimraf": "^3.0.2",
     "ts-node": "^10.7.0"
   }
 }
