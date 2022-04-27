@@ -104,7 +104,7 @@ export default class AccountController implements RegistrableController {
       const model: ISignUpModel = {
         ...req.body,
         // default user avatar
-        avatar: getAvatar.default(req.body.name),
+        avatar: getAvatar.default(req.body.first_name, req.body.last_name),
         role: req.body.role && req.body.role
       };
 

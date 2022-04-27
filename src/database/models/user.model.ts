@@ -4,11 +4,18 @@ import { AccountRolesEnum } from '../../domain/enums/account';
 export interface IUserDocument extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   googleId: string | undefined;
-  name: string;
+  first_name: string;
+  last_name: string;
   username: string;
   email: string;
-  avatar: string;
   password: string;
+  avatar: string;
+  gender: string;
+  birth_year: number;
+  birth_month: number;
+  birth_day: number;
+  verified: boolean;
+  search: string[];
   refreshToken: string;
   role: AccountRolesEnum[];
 }
@@ -16,11 +23,24 @@ export interface IUserDocument extends mongoose.Document {
 const UserSchema: mongoose.Schema = new mongoose.Schema(
   {
     googleId: { type: String },
-    name: { type: String, required: true, trim: true },
-    username: { type: String, required: true, trim: true, unique: true },
+    first_name: { type: String, required: true, trim: true, text: true },
+    last_name: { type: String, required: true, trim: true, text: true },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      text: true,
+      unique: true
+    },
     email: { type: String, required: true, trim: true, unique: true },
+    password: { type: String, required: true },
     avatar: { type: String },
-    password: { type: String },
+    gender: { type: String },
+    birth_year: { type: Number },
+    birth_month: { type: Number },
+    birth_day: { type: Number },
+    verified: { type: Boolean, default: false },
+    search: [{ user: { type: mongoose.Types.ObjectId, ref: 'User' } }],
     refreshToken: { type: String },
     role: {
       type: [String],

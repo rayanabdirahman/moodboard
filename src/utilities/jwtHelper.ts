@@ -22,7 +22,8 @@ const _setPayload = (user: IUserDocument): IJWTPayload => {
   return {
     user: {
       _id: user._id as unknown as string,
-      name: user.name,
+      first_name: user.first_name,
+      last_name: user.last_name,
       username: user.username,
       email: user.email,
       avatar: user.avatar,

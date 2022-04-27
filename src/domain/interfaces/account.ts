@@ -29,5 +29,14 @@ export interface SignInModel {
 }
 
 export interface IJWTPayload {
-  user: IUserModel;
+  // user: IUserModel;
+  user: {
+    _id: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    email: string;
+    avatar: string;
+    role: AccountRolesEnum[];
+  };
 }
