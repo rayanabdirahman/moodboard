@@ -17,8 +17,10 @@ export interface IUserDocument extends mongoose.Document {
   birth_day: number;
   verified: boolean;
   search: string[];
-  refreshToken: string;
   role: AccountRolesEnum[];
+  stripe_account_id: string;
+  stripe_seller: any;
+  stripe_session: any;
 }
 
 const UserSchema: mongoose.Schema = new mongoose.Schema(
@@ -42,12 +44,14 @@ const UserSchema: mongoose.Schema = new mongoose.Schema(
     birth_day: { type: Number },
     verified: { type: Boolean, default: false },
     search: [{ user: { type: mongoose.Types.ObjectId, ref: 'User' } }],
-    refreshToken: { type: String },
     role: {
       type: [String],
       enum: [AccountRolesEnum],
       default: AccountRolesEnum.BUYER
-    }
+    },
+    stripe_account_id: { type: String, default: null },
+    stripe_seller: {},
+    stripe_session: {}
   },
   { timestamps: true }
 );

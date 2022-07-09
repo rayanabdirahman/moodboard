@@ -1,5 +1,5 @@
 export enum AccountRolesEnum {
   BUYER = 'Buyer',
-  STORE_ADMIN = 'StoreAdmin',
+  STORE = 'Store',
   SUPER_ADMIN = 'SuperAdmin'
 }
